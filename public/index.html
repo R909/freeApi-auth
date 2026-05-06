@@ -1176,7 +1176,7 @@
       // FIX: added credentials:'include' to login &
       //      current-user so cookies are sent/stored
       // ==============================================
-      const BASE_URL = "/api/v1/users";
+      const BASE_URL = "https://api.freeapi.app/api/v1/users";
 
       async function handleResponse(res) {
         let data;
@@ -1194,40 +1194,53 @@
       }
 
       async function registerUser(payload) {
-        const res = await fetch(`${BASE_URL}/register`, {
+        const options = {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+          },
           body: JSON.stringify(payload),
-        });
+        };
+        const res = await fetch(`${BASE_URL}/register`, options);
         return handleResponse(res);
       }
 
       async function loginUser(payload) {
-        const res = await fetch(`${BASE_URL}/login`, {
+        const options = {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+          },
           body: JSON.stringify(payload),
-        });
+        };
+        const res = await fetch(`${BASE_URL}/login`, options);
+        const data = await res.json();
+        console.log("data", data);
+        localStorage.setItem("token", data.data.accessToken);
+        console.log("data.accessToken",data.data.accessToken)
         return handleResponse(res);
       }
 
-      async function logoutUser() {
-        const res = await fetch(`${BASE_URL}/logout`, {
-          method: "POST",
-          credentials: "include",
-        });
-        return handleResponse(res);
-      }
+ async function logoutUser() {
+  localStorage.removeItem("token");
+  return { success: true };
+}
 
       async function getCurrentUser() {
+        const token = localStorage.getItem("token");
+
         const res = await fetch(`${BASE_URL}/current-user`, {
-          credentials: "include",
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`, // ✅ IMPORTANT
+          },
         });
+
         return handleResponse(res);
       }
-
       // ==============================================
       document.addEventListener("DOMContentLoaded", () => {
         // ── Elements ────────────────────────────────
